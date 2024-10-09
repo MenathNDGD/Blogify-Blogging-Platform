@@ -31,6 +31,6 @@ const BlogSchema = new Schema({
   blogger: { type: Schema.Types.ObjectId, ref: "User" },
 });
 
-const Blog = models.Blog || model("Blog", BlogSchema);
+const Blog = models?.Blog || model("Blog", BlogSchema);
 
 export default Blog;
