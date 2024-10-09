@@ -3,13 +3,12 @@
 import { revalidatePath } from "next/cache";
 
 import { connectToDatabase } from "@/lib/database";
-import { handleError } from "@/lib/utils";
-
-import { CreateUserParams, UpdateUserParams } from "@/types";
-
 import User from "@/lib/database/models/user.model";
 import Order from "@/lib/database/models/order.model";
 import Blog from "@/lib/database/models/blog.model";
+import { handleError } from "@/lib/utils";
+
+import { CreateUserParams, UpdateUserParams } from "@/types";
 
 export async function createUser(user: CreateUserParams) {
   try {
@@ -44,7 +43,6 @@ export async function updateUser(clerkId: string, user: UpdateUserParams) {
     });
 
     if (!updatedUser) throw new Error("User update failed");
-
     return JSON.parse(JSON.stringify(updatedUser));
   } catch (error) {
     handleError(error);
@@ -55,24 +53,29 @@ export async function deleteUser(clerkId: string) {
   try {
     await connectToDatabase();
 
+    // Find user to delete
     const userToDelete = await User.findOne({ clerkId });
 
     if (!userToDelete) {
       throw new Error("User not found");
     }
 
+    // Unlink relationships
     await Promise.all([
+      // Update the 'blogs' collection to remove references to the user
       Blog.updateMany(
         { _id: { $in: userToDelete.blogs } },
-        { $pull: { blogger: userToDelete._id } }
+        { $pull: { organizer: userToDelete._id } }
       ),
 
+      // Update the 'orders' collection to remove references to the user
       Order.updateMany(
         { _id: { $in: userToDelete.orders } },
         { $unset: { buyer: 1 } }
       ),
     ]);
 
+    // Delete user
     const deletedUser = await User.findByIdAndDelete(userToDelete._id);
     revalidatePath("/");
 
