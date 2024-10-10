@@ -13,13 +13,13 @@ export const headerLinks = [
   },
 ];
 
-export const eventDefaultValues = {
+export const blogDefaultValues = {
   title: "",
   description: "",
   location: "",
   imageUrl: "",
-  startDateTime: new Date(),
-  endDateTime: new Date(),
+  readingTime: "",
+  publishedDateTime: new Date(),
   categoryId: "",
   price: "",
   isFree: false,
