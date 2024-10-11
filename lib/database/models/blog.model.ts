@@ -7,7 +7,7 @@ export interface IBlog extends Document {
   location?: string;
   createdAt: Date;
   imageUrl: string;
-  readingTime: number;
+  readingTime: string;
   publishedDateTime: Date;
   price?: string;
   isFree: boolean;
@@ -22,7 +22,7 @@ const BlogSchema = new Schema({
   location: { type: String },
   createdAt: { type: Date, default: Date.now },
   imageUrl: { type: String, required: true },
-  readingTime: { type: Number, required: true },
+  readingTime: { type: String, required: true },
   publishedDateTime: { type: Date, default: Date.now },
   price: { type: String },
   isFree: { type: Boolean, default: false },
