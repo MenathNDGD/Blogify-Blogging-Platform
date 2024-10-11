@@ -23,7 +23,7 @@ export type CreateBlogParams = {
     description: string;
     location: string;
     imageUrl: string;
-    readingTime: number;
+    readingTime: string;
     publishedDateTime: Date;
     categoryId: string;
     price: string;
@@ -41,7 +41,7 @@ export type UpdateBlogParams = {
     imageUrl: string;
     description: string;
     location: string;
-    readingTime: number;
+    readingTime: string;
     publishedDateTime: Date;
     categoryId: string;
     price: string;
@@ -84,7 +84,7 @@ export type Blog = {
   isFree: boolean;
   imageUrl: string;
   location: string;
-  readingTime: number;
+  readingTime: string;
   publishedDateTime: Date;
   url: string;
   blogger: {
