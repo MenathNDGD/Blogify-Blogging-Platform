@@ -21,7 +21,10 @@ import { FileUploader } from "./FileUploader";
 import { useState } from "react";
 import Image from "next/image";
 import DatePicker from "react-datepicker";
+import { useUploadThing } from "@/lib/uploadthing";
+import { useRouter } from "next/navigation";
 import "react-datepicker/dist/react-datepicker.css";
+import { createBlog } from "@/lib/actions/blog.actions";
 
 type BlogFormProps = {
   userId: string;
@@ -31,14 +34,44 @@ type BlogFormProps = {
 const BlogForm = ({ userId, type }: BlogFormProps) => {
   const [files, setFiles] = useState<File[]>([]);
   const initialValues = blogDefaultValues;
+  const router = useRouter();
+
+  const { startUpload } = useUploadThing("imageUploader");
 
   const form = useForm<z.infer<typeof blogFormSchema>>({
     resolver: zodResolver(blogFormSchema),
     defaultValues: initialValues,
   });
 
-  function onSubmit(values: z.infer<typeof blogFormSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof blogFormSchema>) {
+    let uploadedImageUrl = values.imageUrl;
+
+    if (files.length > 0) {
+      const uploadedImages = await startUpload(files);
+
+      if (!uploadedImages) {
+        return;
+      }
+
+      uploadedImageUrl = uploadedImages[0].url;
+    }
+
+    if (type === "Create") {
+      try {
+        const newBlog = await createBlog({
+          blog: { ...values, imageUrl: uploadedImageUrl },
+          userId,
+          path: "/profile",
+        });
+
+        if (newBlog) {
+          form.reset();
+          router.push("/blogs/new");
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    }
   }
 
   return (
@@ -189,10 +222,10 @@ const BlogForm = ({ userId, type }: BlogFormProps) => {
                       height={24}
                     />
                     <Input
+                      type="number"
                       placeholder="Reading Time (Minutes)"
                       {...field}
                       className="input-field"
-                      accept="number"
                     />
                   </div>
                 </FormControl>
@@ -220,12 +253,7 @@ const BlogForm = ({ userId, type }: BlogFormProps) => {
                       type="number"
                       placeholder="Price"
                       {...field}
-                      disabled={form.watch("isFree")}
-                      className={`p-regular-16 border-0 bg-grey-50 outline-offset-0 focus:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${
-                        form.watch("isFree")
-                          ? "cursor-not-allowed text-gray-400"
-                          : ""
-                      }`}
+                      className="p-regular-16 border-0 bg-grey-50 outline-offset-0 focus:border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                     />
                     <FormField
                       control={form.control}
@@ -242,6 +270,8 @@ const BlogForm = ({ userId, type }: BlogFormProps) => {
                               </label>
                               <Checkbox
                                 id="isFree"
+                                onCheckedChange={field.onChange}
+                                checked={field.value}
                                 className="mr-2 h-5 w-5 border-2 border-primary-500"
                               />
                             </div>
