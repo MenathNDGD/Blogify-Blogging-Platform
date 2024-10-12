@@ -23,8 +23,9 @@ import Image from "next/image";
 import DatePicker from "react-datepicker";
 import { useUploadThing } from "@/lib/uploadthing";
 import { useRouter } from "next/navigation";
-import "react-datepicker/dist/react-datepicker.css";
 import { createBlog } from "@/lib/actions/blog.actions";
+import { FaSpinner } from "react-icons/fa";
+import "react-datepicker/dist/react-datepicker.css";
 
 type BlogFormProps = {
   userId: string;
@@ -66,7 +67,7 @@ const BlogForm = ({ userId, type }: BlogFormProps) => {
 
         if (newBlog) {
           form.reset();
-          router.push("/blogs/new");
+          router.push(`/blogs/${newBlog._id}`);
         }
       } catch (error) {
         console.log(error);
@@ -201,6 +202,7 @@ const BlogForm = ({ userId, type }: BlogFormProps) => {
                       timeInputLabel="Time:"
                       dateFormat="MMMM d, yyyy h:mm aa"
                       wrapperClassName="datePicker"
+                      className="cursor-pointer"
                     />
                   </div>
                 </FormControl>
@@ -254,6 +256,7 @@ const BlogForm = ({ userId, type }: BlogFormProps) => {
                       placeholder="Price"
                       {...field}
                       className="p-regular-16 border-0 bg-grey-50 outline-offset-0 focus:border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                      disabled={form.watch("isFree")}
                     />
                     <FormField
                       control={form.control}
@@ -313,11 +316,17 @@ const BlogForm = ({ userId, type }: BlogFormProps) => {
         </div>
         <Button
           type="submit"
-          size={"lg"}
-          disabled={form.formState.isSubmitting}
           className="button col-span-2 w-full"
+          disabled={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? "Submitting..." : `${type} Post`}
+          {form.formState.isSubmitting ? (
+            <>
+              <FaSpinner className="mr-2 animate-spin" />
+              {type === "Create" ? "Creating..." : "Updating..."}
+            </>
+          ) : (
+            `${type} Blog`
+          )}
         </Button>
       </form>
     </Form>
